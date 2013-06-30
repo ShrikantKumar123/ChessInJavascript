@@ -1,0 +1,779 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body onload="createChessBoard();
+            displayBoard();">
+        <script type="text/javascript">
+        var chess = {};
+        function createChessBoard() {
+            return createBoard();
+        }
+        function createBoard()
+        {
+            chess.board = {};
+            chess.k = {1: "a", 2: "b", 3: "c", 4: "d", 5: "e", 6: "f", 7: "g", 8: "h"};
+            chess.l = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8};
+            chess.board.tiles = createTiles();
+            chess.board.firstMoveWhiteOver = false;
+            chess.board.firstMoveBlackOver = false;
+            //chess.board.pieces = createPieceObjects();
+            placePiecesOnTheirInitialPositions();
+            return chess.board;
+        }
+        function placePiecesOnTheirInitialPositions()
+        {
+            var white = true;
+            placeRooksOnTheirInitialPositions(white);
+            placeKnightsOnTheirInitialPositions(white);
+            placeBishopsOnTheirInitialPositions(white);
+            placeQueensOnTheirInitialPositions(white);
+            placeKingsOnTheirInitialPositions(white);
+            placePawnsOnTheirInitialPositions(white);
+        }
+        function placeRooksOnTheirInitialPositions(white)
+        {
+            var rooksInititalPos = ["a1", "a8", "h1", "h8"];
+            for (var v in rooksInititalPos)
+            {
+                if (rooksInititalPos[v].indexOf('1') > -1)
+                {
+                    chess.board.tiles[rooksInititalPos[v]] = chess.RookFactory.instance(white, "&#9814;");
+                }
+                else
+                {
+                    chess.board.tiles[rooksInititalPos[v]] = chess.RookFactory.instance(!white, "&#9820;");
+                }
+            }
+        }
+        function placeKnightsOnTheirInitialPositions(white)
+        {
+            var knightsInititalPos = ["b1", "b8", "g1", "g8"];
+            for (var v in knightsInititalPos)
+            {
+                if (knightsInititalPos[v].indexOf('1') > -1)
+                {
+                    chess.board.tiles[knightsInititalPos[v]] = chess.KnightFactory.instance(white, "&#9816;");
+                }
+                else
+                {
+                    chess.board.tiles[knightsInititalPos[v]] = chess.KnightFactory.instance(!white, "&#9822;");
+                }
+            }
+        }
+        function placeBishopsOnTheirInitialPositions(white)
+        {
+            var bishopsInititalPos = ["c1", "c8", "f1", "f8"];
+            for (var v in bishopsInititalPos)
+            {
+                if (bishopsInititalPos[v].indexOf('1') > -1)
+                {
+                    chess.board.tiles[bishopsInititalPos[v]] = chess.BishopFactory.instance(white, "&#9815;");
+                }
+                else
+                {
+                    chess.board.tiles[bishopsInititalPos[v]] = chess.BishopFactory.instance(!white, "&#9821;");
+                }
+            }
+        }
+        function placeQueensOnTheirInitialPositions(white)
+        {
+            var queensInititalPos = ["d1", "e8"];
+            for (var v in queensInititalPos)
+            {
+                if (queensInititalPos[v].indexOf('d') > -1)
+                {
+                    chess.board.tiles[queensInititalPos[v]] = chess.QueenFactory.instance(white, "&#9813;");
+                }
+                else
+                {
+                    chess.board.tiles[queensInititalPos[v]] = chess.QueenFactory.instance(white, "&#9819;");
+                }
+            }
+        }
+        function placeKingsOnTheirInitialPositions(white)
+        {
+            var kingsInititalPos = ["e1", "d8"];
+            for (var v in kingsInititalPos)
+            {
+                if (kingsInititalPos[v].indexOf('e') > -1)
+                {
+                    chess.board.tiles[kingsInititalPos[v]] = chess.KingFactory.instance(white, "&#9812;");
+                }
+                else
+                {
+                    chess.board.tiles[kingsInititalPos[v]] = chess.KingFactory.instance(!white, "&#9818;");
+                }
+            }
+        }
+        function placePawnsOnTheirInitialPositions(white)
+        {
+            for (var rank = 2; rank <= 7; rank++)
+            {
+                for (var file = 1; file <= 8; file++)
+                {
+                    switch (rank)
+                    {
+                        case 2:
+                            chess.board.tiles[chess.k[file] + rank] = chess.PawnFactory.instance(white, "&#9817;");
+                            break;
+                        case 7:
+                            chess.board.tiles[chess.k[file] + rank] = chess.PawnFactory.instance(!white, "&#9823;");
+                            break;
+                        default:
+                            chess.board.tiles[chess.k[file] + rank] = null;
+                            break;
+                    }
+                }
+            }
+        }
+        function createTiles()
+        {
+            var tiles = new Array(64);
+            var white = true;
+            for (var rank = 1; rank <= 8; rank++)
+            {
+                for (var file = 1; file <= 8; file++)
+                {
+                    if (rank % 2 === file % 2)
+                    {
+                        tiles[chess.k[file] + rank] = new Tile(chess.k[file], rank, !white);
+                    }
+                    else
+                    {
+                        tiles[chess.k[file] + rank] = new Tile(chess.k[file], rank, white);
+                    }
+                }
+            }
+            return tiles;
+        }
+        var Tile = function(file, rank, tileColor)
+        {
+            this.file = file;
+            this.rank = rank;
+            this.tileColor = tileColor;
+        };
+//        function createPieceObjects()
+//        {
+//            Pawn.prototype = chess.Piece;
+//            King.prototype = Piece;
+//            Queen.prototype = Piece;
+//            Knight.prototype = Piece;
+//            Bishop.prototype = Piece;
+//            Rook.prototype = Piece;
+//            var pieces = [Pawn, King, Queen, Knight, Bishop, Rook, chess.Piece];
+//            return pieces;
+//        }
+        chess.RookFactory =
+                {
+                    instance: function(color, type)
+                    {
+                        var Rook =
+                                {
+                                    move: function(source, destn)
+                                    {
+                                        var sourceFirstChar = source.charAt(0);
+                                        var destnFirstChar = destn.charAt(0);
+                                        var sourceSecondChar = Number(source.charAt(1));
+                                        var destnSecondChar = Number(destn.charAt(1));
+                                        if (sourceFirstChar !== destnFirstChar && sourceSecondChar !== destnSecondChar)
+                                        {
+                                            return false;
+                                        }
+
+                                        var right = chess.l[destnFirstChar] > chess.l[sourceFirstChar];
+                                        var left = chess.l[destnFirstChar] < chess.l[sourceFirstChar];
+                                        var top = destnSecondChar > sourceSecondChar;
+                                        var bottom = destnSecondChar < sourceSecondChar;
+
+                                        var possibleMoves = [];
+                                        var diff = Math.abs(destnSecondChar - sourceSecondChar) === 0
+                                                ? Math.abs(chess.l[destnFirstChar] - chess.l[sourceFirstChar])
+                                                : Math.abs(destnSecondChar - sourceSecondChar);
+                                        var temp = sourceSecondChar;
+                                        for (var i = 1; i <= diff; i++)
+                                        {
+                                            if (top)
+                                            {
+                                                var nextTile = sourceFirstChar + (++temp);
+                                            }
+                                            if (bottom)
+                                            {
+                                                var nextTile = sourceFirstChar + (--temp);
+                                            }
+                                            if (right)
+                                            {
+                                                var nextTile = chess.k[chess.l[sourceFirstChar] + i] + sourceSecondChar;
+                                            }
+                                            if (left)
+                                            {
+                                                var nextTile = chess.k[chess.l[sourceFirstChar] - i] + sourceSecondChar;
+                                            }
+                                            possibleMoves.push(nextTile);
+                                            if (chess.board.tiles[nextTile] !== null && nextTile !== destn)
+                                            {
+                                                alert("A piece in between");
+                                                return false;
+                                            }
+                                        }
+                                        if (possibleMoves.indexOf(destn) === -1)
+                                        {
+                                            alert("Not a possible move ");
+                                            return false;
+                                        }
+                                        return true;
+                                    }
+                                };
+                        createPiece.call(Rook, color, type);
+                        return Rook;
+                    }
+                };
+
+        chess.KnightFactory =
+                {
+                    instance: function(color, type)
+                    {
+                        var Knight =
+                                {
+                                    move: function(source, destn)
+                                    {
+                                        var sourceFirstChar = source.charAt(0);
+                                        var destnFirstChar = destn.charAt(0);
+                                        var sourceSecondChar = Number(source.charAt(1));
+                                        var destnSecondChar = Number(destn.charAt(1));
+                                        if (sourceFirstChar === destnFirstChar || sourceSecondChar === destnSecondChar)
+                                        {
+                                            return false;
+                                        }
+
+                                        var possibleMoves = [];
+                                        //Top Left 1
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] - 2] + (sourceSecondChar + 1));
+//                                        //Top Right 1
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] + 2] + (sourceSecondChar + 1));
+//                                        //Top Left 2
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] - 1] + (sourceSecondChar + 2));
+//                                        //Top Right 2
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] + 1] + (sourceSecondChar + 2));
+//
+//                                        //Bottom Left 1
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] - 2] + (sourceSecondChar - 1));
+//                                        //Bottom Left 2
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] - 1] + (sourceSecondChar - 2));
+//                                        //Bottom Right 1
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] + 2] + (sourceSecondChar - 1));
+//                                        //Bottom Right 2
+//                                        possibleMoves.push(chess.k[chess.l[sourceFirstChar] + 1] + (sourceSecondChar - 2));
+
+
+
+                                        for (var i = -2; i <= 2; i++)
+                                        {
+                                            if (((chess.l[sourceFirstChar] + i) > 0) && ((chess.l[sourceFirstChar] + i) <= 8))
+                                            {
+                                                switch (i)
+                                                {
+                                                    case 2:
+                                                    case -2:
+                                                        if (!((sourceSecondChar + 1) > 8))
+                                                        {
+                                                            possibleMoves.push(chess.k[chess.l[sourceFirstChar] + i] + (sourceSecondChar + 1));
+                                                        }
+                                                        if (!((sourceSecondChar - 1) < 1))
+                                                        {
+                                                            possibleMoves.push(chess.k[chess.l[sourceFirstChar] + i] + (sourceSecondChar - 1));
+                                                        }
+                                                        break;
+                                                    case 1:
+                                                    case -1:
+                                                        if (!((sourceSecondChar + 1) > 8))
+                                                        {
+                                                            possibleMoves.push(chess.k[chess.l[sourceFirstChar] + i] + (sourceSecondChar + 2));
+                                                        }
+                                                        if (!((sourceSecondChar - 1) < 1))
+                                                        {
+                                                            possibleMoves.push(chess.k[chess.l[sourceFirstChar] + i] + (sourceSecondChar - 2));
+                                                        }
+                                                        break;
+                                                }
+
+                                            }
+                                        }
+                                        if (possibleMoves.indexOf(destn) === -1)
+                                        {
+                                            alert("Not a possible move ");
+                                            return false;
+                                        }
+
+                                        alert("In Knight");
+                                        return true;
+                                    }
+                                };
+                        createPiece.call(Knight, color, type);
+                        return Knight;
+                    }
+                };
+
+        chess.PawnFactory =
+                {
+                    instance: function(color, type)
+                    {
+                        var Pawn =
+                                {
+                                    move: function(source, destn)
+                                    {
+                                        alert(this.moveSuccesful);
+                                        if (chess.board.tiles[destn] === null)//Not a capture move
+                                        {
+                                            return this.notCaptureMove(source, destn);
+                                        }
+                                        //Capture move
+                                        if (chess.board.tiles[destn] !== null)
+                                        {
+                                            return this.captureMove(source, destn);
+                                        }
+                                        return false;
+                                    },
+                                    captureMove: function(source, destn)
+                                    {
+                                        return this.captureMoveValidations(source, destn);
+                                    },
+                                    captureMoveValidations: function(source, destn)
+                                    {
+                                        if (source.charAt(0) !== destn.charAt(0))
+                                        {
+                                            if ([1, -1].indexOf(source.charAt(1) - destn.charAt(1)) !== -1)
+                                            {
+                                                for (var i in chess.k)
+                                                {
+                                                    if (source.charAt(0) === chess.k[Number(i)])
+                                                    {
+                                                        if (destn.charAt(0) === chess.k[Number(i) - Number(1)]
+                                                                || destn.charAt(0) === chess.k[Number(i) + Number(1)])
+                                                        {
+                                                            return true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        //Validation for white pawn
+                                        if (chess.board.tiles[source]['color'])
+                                        {
+
+                                        }
+                                        //Validation for black pawn
+                                        if (!chess.board.tiles[source]['color'])
+                                        {
+
+                                        }
+                                        return false;
+                                    },
+                                    notCaptureMove: function(source, destn)
+                                    {
+                                        if (!this.notCaptureMoveValidations(source, destn))
+                                        {
+                                            return false;
+                                        }
+                                        else
+                                        {
+                                            return true;
+                                        }
+                                    },
+                                    notCaptureMoveValidations: function(source, destn)
+                                    {
+                                        //validation to check if source and destn are in same line
+                                        if (source.charAt(0) !== destn.charAt(0))
+                                        {
+                                            alert("Invalid move for Pawn");
+                                            return false;
+                                        }
+                                        //validation to allow max 2 spaces as first move for pawn
+                                        if (source.indexOf("2") > -1 || source.indexOf("7") > -1)
+                                        {
+                                            if ([-2, -1, 1, 2].indexOf(source.charAt(1) - destn.charAt(1)) === -1)
+                                            {
+                                                alert("Invalid move for Pawn");
+                                                return false;
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        }
+                                        //Validation to disallow white pawn moving backward
+                                        if (this.color)
+                                        {
+                                            //Turning white pawn into Queen
+                                            if (destn.charAt(1) === 8)
+                                            {
+
+                                            }
+                                            if (destn.charAt(1) - source.charAt(1) !== 1)
+                                            {
+                                                alert("aaa");
+                                                return false;
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        }
+                                        //Validation to disallow white pawn moving backward
+                                        if (!this.color)
+                                        {
+                                            alert("GGGG");
+                                            //Turning black pawn into Queen
+                                            if (destn.charAt(1) === 1)
+                                            {
+
+                                            }
+                                            if (destn.charAt(1) - source.charAt(1) !== -1)
+                                            {
+                                                alert("bbb");
+                                                return false;
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                };
+                        createPiece.call(Pawn, color, type);
+                        return Pawn;
+                    }
+                };
+
+        chess.BishopFactory =
+                {
+                    instance: function(color, type)
+                    {
+                        var Bishop =
+                                {
+                                    move: function(source, destn)
+                                    {
+                                        var sourceFirstChar = source.charAt(0);
+                                        var destnFirstChar = destn.charAt(0);
+                                        var sourceSecondChar = Number(source.charAt(1));
+                                        var destnSecondChar = Number(destn.charAt(1));
+                                        if (sourceFirstChar === destnFirstChar || sourceSecondChar === destnSecondChar)
+                                        {
+                                            return false;
+                                        }
+
+                                        var right = chess.l[destnFirstChar] > chess.l[sourceFirstChar];
+                                        var left = chess.l[destnFirstChar] < chess.l[sourceFirstChar];
+                                        var top = destnSecondChar > sourceSecondChar;
+                                        var bottom = destnSecondChar < sourceSecondChar;
+
+                                        var diff = Math.abs(chess.l[destnFirstChar] - chess.l[sourceFirstChar]);
+                                        var possibleMoves = [];
+                                        var temp = sourceSecondChar;
+                                        for (var i = 1; i <= diff; i++)
+                                        {
+                                            //Next tile to check
+                                            var nextTile = {};
+                                            //Top Right
+                                            if (top && right)
+                                            {
+                                                nextTile = chess.k[chess.l[sourceFirstChar] + i] + (++temp);
+                                            }
+                                            //Bottom Right
+                                            else if (bottom && right)
+                                            {
+                                                nextTile = chess.k[chess.l[sourceFirstChar] + i] + (--temp);
+                                            }
+                                            //Top Left
+                                            else if (top && left)
+                                            {
+                                                nextTile = chess.k[chess.l[sourceFirstChar] - i] + (++temp);
+                                            }
+                                            //Bottom Left
+                                            else if (bottom && left)
+                                            {
+                                                nextTile = chess.k[chess.l[sourceFirstChar] - i] + (--temp);
+                                            }
+                                            alert(nextTile);
+                                            possibleMoves.push(nextTile);
+                                            if (chess.board.tiles[nextTile] !== null && nextTile !== destn)
+                                            {
+                                                alert("A piece in between");
+                                                return false;
+                                            }
+                                        }
+                                        if (possibleMoves.indexOf(destn) === -1)
+                                        {
+                                            alert("Not a possible move ");
+                                            return false;
+                                        }
+                                        alert("In Bishop");
+                                        return true;
+                                    }
+                                };
+                        createPiece.call(Bishop, color, type);
+                        return Bishop;
+                    }
+                };
+
+        chess.QueenFactory =
+                {
+                    instance: function(color, type)
+                    {
+                        var Queen =
+                                {
+                                    move: function(color, type)
+                                    {
+                                        alert("In Queen");
+                                    }
+                                };
+                        createPiece.call(Queen, color, type);
+                        return Queen;
+                    }
+                };
+
+        chess.KingFactory =
+                {
+                    instance: function(color, type)
+                    {
+                        var King =
+                                {
+                                    move: function()
+                                    {
+                                        alert("In King");
+                                    }
+                                };
+                        createPiece.call(King, color, type);
+                        return King;
+                    }
+                };
+
+        var createPiece = function(color, type)
+        {
+            this.color = color;//color is a bolean value. true represents white
+            this.moveSuccesful = false;
+            this.type = type;
+        };
+
+        function displayBoard()
+        {
+            for (var location in chess.board.tiles)
+            {
+                if (chess.board.tiles[location] !== null)
+                {
+                    document.getElementById(location).innerHTML = (chess.board.tiles[location]['type']);
+                }
+                else
+                {
+                    document.getElementById(location).innerHTML = null;
+                }
+            }
+        }
+
+        function checkSamePieceColor(source, destn)
+        {
+            if (chess.board.tiles[destn] !== null)
+            {
+                return (chess.board.tiles[source]['color'] === chess.board.tiles[destn]['color']);
+            }
+            return false;
+        }
+        function checkLastPieceColor(source)
+        {
+            return (chess.board.lastMoveColor === chess.board.tiles[source]['color']);
+        }
+
+
+        function move()
+        {
+            var source = document.getElementById("source").value;
+            var destn = document.getElementById("destn").value;
+            if (source === destn)
+            {
+                alert("Invalid move");
+                return;
+            }
+            if (source === null || source === "" || destn === null || destn === "")
+            {
+                alert("Test");
+                return;
+            }
+            if (!chess.board.firstMoveWhiteOver && chess.board.tiles[source]['color'])
+            {
+                if (!isFirstMoveWhiteValid(source))
+                {
+                    alert("First move of White is invalid");
+                    return;
+                }
+            }
+
+            if (!chess.board.firstMoveBlackOver && !chess.board.tiles[source]['color'])
+            {
+                if (!isFirstMoveBlackValid(source))
+                {
+                    alert("First move of Black is invalid");
+                    return;
+                }
+            }
+            if (chess.board.tiles[source] !== null)
+            {
+                if (checkLastPieceColor(source))
+                {
+                    alert("Same color pieces cannot be moved consecutively");
+                    return;
+                }
+                if (checkSamePieceColor(source, destn))
+                {
+                    alert("Same color pieces cannot make a capture move on each other");
+                    return;
+                }
+                if (chess.board.tiles[source].move(source, destn))
+                {
+                    chess.board.lastMoveColor = chess.board.tiles[source]['color'];
+                    chess.board.tiles[destn] = chess.board.tiles[source];
+                    chess.board.tiles[source] = null;
+                    displayBoard();
+                    if (chess.board.lastMoveColor)
+                    {
+                        chess.board.firstMoveWhiteOver = true;
+                    }
+                    else
+                    {
+                        chess.board.firstMoveBlackOver = true;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                alert("Invalid move");
+            }
+        }
+        function isFirstMoveWhiteValid(location)
+        {
+            // Check if the piece color is white
+            if (!chess.board.tiles[location]['color'])
+            {
+                return false;
+            }
+            if (chess.board.tiles[location]['type'] !== "&#9816;" && chess.board.tiles[location]['type'] !== "&#9817;")
+            {
+                return false;
+            }
+            return true;
+        }
+        function isFirstMoveBlackValid(location)
+        {
+            // Check if the piece color is white
+            if (chess.board.tiles[location]['color'])
+            {
+                return false;
+            }
+            if (chess.board.tiles[location]['type'] !== "&#9822;" && chess.board.tiles[location]['type'] !== "&#9823;")
+            {
+                return false;
+            }
+            return true;
+        }
+        </script>
+        <table border="1" style="width: 560px; height: 560px">
+            <tr>
+                <td id="a8" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b8" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c8" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="d8" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                
+                <td id="e8" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f8" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g8" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h8" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a7" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b7" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c7" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                                
+                <td id="d7" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="e7" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f7" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g7" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h7" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a6" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b6" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c6" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="d6" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                
+                <td id="e6" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f6" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g6" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h6" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a5" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b5" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c5" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                                
+                <td id="d5" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="e5" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f5" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g5" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h5" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a4" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b4" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c4" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="d4" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                
+                <td id="e4" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f4" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g4" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h4" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a3" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b3" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c3" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                                
+                <td id="d3" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="e3" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f3" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g3" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h3" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a2" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b2" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c2" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="d2" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                
+                <td id="e2" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f2" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g2" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h2" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+            <tr>
+                <td id="a1" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="b1" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="c1" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>                                
+                <td id="d1" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="e1" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="f1" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="g1" style="background-color: grey; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+                <td id="h1" style="background-color: white; width: 70px; height: 70px; text-align: center; font-size: 40px"></td>
+            </tr>
+        </table>
+        <br>
+        <div style="width: 560px; height: 560px; text-align: center">
+            Move from 
+            <input type="text" id="source" name="source" value="" size="4" /> 
+            to 
+            <input type="text" id="destn" name="destn" value="" size="4" />
+            <input type="submit" id="btnGo" onclick="move();" value="Go" />
+        </div>
+    </body>
+</html>
